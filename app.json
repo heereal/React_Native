@@ -28,6 +28,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "52528121-bf9b-4fde-9722-32954be90242"
+      }
+    },
+    "owner": "heer"
   }
 }
