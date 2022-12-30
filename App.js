@@ -1,16 +1,18 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, ScrollView, Text, TouchableOpacity, View, Alert, TextInput } from 'react-native';
 import { AntDesign } from '@expo/vector-icons'; 
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { FontAwesome } from '@expo/vector-icons'; 
 import styled from '@emotion/native'
 import { useState } from 'react';
 
+
 const App = () => {
 
   const [text, setText] = useState("");
   const [category, setCategory] = useState("Javascript");
   const [todos, setTodos] = useState([]);
+  const [editText, setEditText] = useState("");
   
   const neWTodo = {
     id: Date.now(),
@@ -20,7 +22,7 @@ const App = () => {
     category
   };
 
-  const addTodo = () => {
+  const addTodo = async () => {
     setTodos([...todos, neWTodo]);
     setText("");
   };
@@ -29,6 +31,32 @@ const App = () => {
     const copy = [...todos];
     const newTodos = copy.map((todo) => todo.id === id ? {...todo, isDone: !todo.isDone} : todo);
     setTodos(newTodos)
+  };
+
+  const deleteTodo = (id) => {
+    Alert.alert("삭제", "정말 삭제하시겠습니다?", [
+      {text: "취소", 
+      style: "caneel"},
+      {text: "삭제", 
+      style: "destructive", 
+      onPress: () => {
+        const copy = [...todos];
+        const newTodos = copy.filter((todo) => todo.id !== id);
+        setTodos(newTodos)
+      }}
+    ])
+  };
+
+  const setEdit = (id) => {
+    const copy = [...todos];
+    const newTodos = copy.map((todo) => todo.id === id ? {...todo, isEdit: !todo.isEdit} : todo);
+    setTodos(newTodos);
+  };
+
+  const editTodo = (id) => {
+    const copy = [...todos];
+    const newTodos = copy.map((todo) => todo.id === id ? {...todo, isEdit: false, text: editText} : todo )
+    setTodos(newTodos);
   };
 
   return (
@@ -63,13 +91,19 @@ const App = () => {
             if (category === todo.category) {
               return (
               <OneToDo key={todo.id}>
-                <ToDoText style={{textDecorationLine: todo.isDone === false ? "none" : "line-through"}}>{todo.text}</ToDoText>
+                { todo.isEdit 
+                ? <EditInput onChangeText={setEditText} onSubmitEditing={() => editTodo(todo.id)} /> 
+                : <ToDoText style={{textDecorationLine: todo.isDone === false ? "none" : "line-through"}}>{todo.text}</ToDoText> }  
                 <IconBox>
                   <TouchableOpacity onPress={() => setDone(todo.id)}>
                     <AntDesign name="checksquare" size={26} color="black" style={{marginRight: 5}} />
                   </TouchableOpacity>
-                  <MaterialCommunityIcons name="pencil-circle-outline" size={26} color="black" style={{marginRight: 5}} />
-                  <FontAwesome name="trash-o" size={26} color="black" />
+                  <TouchableOpacity onPress={() => setEdit(todo.id)}>
+                    <MaterialCommunityIcons name="pencil-circle-outline" size={26} color="black" style={{marginRight: 5}} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => deleteTodo(todo.id)}>
+                    <FontAwesome name="trash-o" size={26} color="black" />
+                  </TouchableOpacity>
                 </IconBox>  
               </OneToDo>
               )
@@ -149,10 +183,21 @@ const OneToDo = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  
+`
+
+const EditInput = styled.TextInput`
+  flex: 1;
+  background-color: white;
+  border: 1px solid gray;
+  height: 50px;
+  padding: 10px 20px;
+  font-size: 22px;
+  margin: 0 10px 0 5px;
 `
 
 const ToDoText = styled.Text`
+  padding: 0 20px;
   font-size: 22px;
 `
 
@@ -160,6 +205,7 @@ const IconBox = styled.View`
   display: flex;
   flex-direction: row;
   gap: 0 50px;
+  padding-right: 10px;
 `
 
 export default App;
